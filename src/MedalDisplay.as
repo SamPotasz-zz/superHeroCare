@@ -4,7 +4,6 @@ package
 	import org.flixel.FlxObject;
 	import org.flixel.FlxSprite;
 	import org.flixel.FlxText;
-	import states.LevelStats;
 	
 	/**
 	 * ...
@@ -17,7 +16,7 @@ package
 		 * Indicates how many saves player needs on each level
 		 * to achieve the given medal
 		 */
-		private static const MEDALS:Array = [[ 5, 10, 15 ], [ 10, 20, 30 ], [ 15, 30, 45 ]];
+		public static const MEDALS:Array = [[ 5, 10, 15 ], [ 10, 20, 30 ], [ 15, 30, 45 ]];
 		
 		private static const MEDAL_X:int = 3;
 		private static const MEDAY_YS:Array = [ 50, 60, 70 ];
@@ -36,7 +35,7 @@ package
 			
 		private var currStats:LevelStats;
 		
-		override public function create(): void
+		public function MedalDisplay()
 		{
 			currStats = FlxG.scores[ FlxG.level ];
 			

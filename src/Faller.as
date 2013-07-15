@@ -2,7 +2,6 @@ package
 {
 	import org.flixel.FlxG;
 	import org.flixel.FlxSprite;
-	import states.LevelStats;
 	import states.PlayState;
 	
 	/**

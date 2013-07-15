@@ -34,7 +34,8 @@ package
 			super( FlxG.width - 15 );
 			onCreate();
 			
-			health = ( FlxG.level == 0 ) ? MAX_HEALTH : FlxG.scores[ SCORES_HEALTH_INDEX ];			
+			//health = Math.min( MAX_HEALTH, FlxG.scores[ SCORES_HEALTH_INDEX ] + ( MAX_HEALTH / 4.0 ));
+			health = MAX_HEALTH;
 		}
 		
 		private function onCreate():void 

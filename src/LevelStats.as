@@ -1,13 +1,18 @@
-package states 
+package  
 {
+	import org.flixel.FlxG;
 	/**
 	 * ...
 	 * @author Sam Potasznik
 	 */
 	public class LevelStats 
 	{
+		private static const FALLERS_LEVELS:Array = [ 10, 25, 60 ];
+		
 		private var _numDead:int = 0;
 		private var _numSaved:int = 0;
+		
+		private var _numFallers:int = 0;
 		
 		public function LevelStats(){}
 		
@@ -27,6 +32,11 @@ package states
 		public function get numDead():int 
 		{
 			return _numDead;
+		}
+		
+		public function get numFallers():int 
+		{
+			return FALLERS_LEVELS[ FlxG.level ];
 		}
 		
 	}

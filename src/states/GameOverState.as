@@ -13,7 +13,7 @@ package states
 		override public function create():void
 		{
 			var title:FlxText;
-			title = new FlxText(0, 20, FlxG.width, "Congratulations, martyr!  \n\nYou've died.");
+			title = new FlxText(0, 20, FlxG.width, "Oh no!  \n\nYou've died a martyr.");
 			title.setFormat (null, 16, 0xFFFFFFFF, "center");
 			add(title);
 			

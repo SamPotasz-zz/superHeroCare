@@ -24,13 +24,18 @@ package
 		
 		private var playState:PlayState;
 		
+		//now many fallers will we create for the level
+		private var _numFalls:int;
+		
 		public function FallerFactory( playState:PlayState ) 
 		{
 			this.playState = playState;
 			
 			period = PERIOD_LEVELS[ FlxG.level ];
+			//_numFalls = FALLS_LEVELS[ FlxG.level ];
+			_numFalls = ( LevelStats )( FlxG.scores[ FlxG.level ]).numFallers;
 			
-			timer.start( period, 0, onTimer );
+			timer.start( period, _numFalls, onTimer );
 		}
 		
 		private function onTimer( timer:FlxTimer ): void
@@ -52,5 +57,15 @@ package
 		{
 			return _fallers;
 		}
+		
+		/* 
+		 * how many fallers will we create for the level
+		 */
+		/*
+		public function get numFalls():int 
+		{
+			return _numFalls;
+		}
+		*/
 	}
 }

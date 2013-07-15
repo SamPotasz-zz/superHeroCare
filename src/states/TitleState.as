@@ -18,7 +18,7 @@ package states
 			add(title);
 			
 			var instructions:FlxText;
-			instructions = new FlxText(20, 128, FlxG.width, "Arrows to move, \nSpace to start");
+			instructions = new FlxText(20, 128, FlxG.width, "Use the ARROW KEYS to move.\n\nPress SPACE to start!");
 			instructions.setFormat (null, 12, 0xFFFFFFFF );
 			add(instructions);
 			
