@@ -54,7 +54,7 @@ package
 		override public function update(): void
 		{
 			//trace( FlxG.scores[ Faller.SCORES_HEALTH_INDEX ] );
-			meter.scale.x = FlxG.scores[ Faller.SCORES_HEALTH_INDEX ];
+			meter.scale.x = FlxG.scores[ Player.SCORES_HEALTH_INDEX ];
 		}
 	}
 }

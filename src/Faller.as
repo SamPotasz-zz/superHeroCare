@@ -2,6 +2,7 @@ package
 {
 	import org.flixel.FlxG;
 	import org.flixel.FlxSprite;
+	import states.LevelStats;
 	import states.PlayState;
 	
 	/**
@@ -10,13 +11,12 @@ package
 	 */
 	public class Faller extends FlxSprite 
 	{
-		public static const SCORES_DEAD_INDEX:int = 0;
-		public static const SCORES_SAVED_INDEX:int = 1;
-		public static const SCORES_HEALTH_INDEX:int = 2;
 		
 		private static const WIDTH:int = 6;
 		private static const HEIGHT:int = 6;
 		private static const COLOR:uint = 0xffffff00;
+		
+		private var currStats:LevelStats;
 		
 		public function Faller() 
 		{
@@ -24,6 +24,8 @@ package
 			
 			velocity.y = 100;
 			acceleration.y = 0; // PlayState.GRAVITY;
+			
+			currStats = FlxG.scores[ FlxG.level ];
 		}
 		
 		override public function update(): void
@@ -32,7 +34,8 @@ package
 			
 			if ( !onScreen() )
 			{
-				FlxG.scores[ SCORES_DEAD_INDEX ] += 1;
+				//FlxG.scores[ SCORES_DEAD_INDEX ] += 1;
+				currStats.addDead();
 				( PlayState )( FlxG.state ).updateDeadText();
 				kill();
 			}
@@ -40,7 +43,8 @@ package
 		
 		public function onCaught():void 
 		{
-			FlxG.scores[ SCORES_SAVED_INDEX ] += 1;
+			//FlxG.scores[ SCORES_SAVED_INDEX ] += 1;
+			currStats.addSaved();
 			( PlayState )( FlxG.state ).updateSavedText();
 			kill();
 		}

@@ -10,6 +10,8 @@ package
 	 */
 	public class Player extends FlxSprite 
 	{	
+		public static const SCORES_HEALTH_INDEX:int = 3;
+		
 		private static const TEXT_X:int = 3;
 		private static const TEXT_Y:int = 3;
 		private static const TEXT_TEXT:String = "HEALTH: ";
@@ -25,12 +27,14 @@ package
 		 
 		private var meter:FlxSprite = new FlxSprite( TEXT_X + TEXT_WIDTH + 1, TEXT_Y + 1 );
 		
+		private var wobbly:Boolean = false;
+		
 		public function Player() 
 		{
 			super( FlxG.width - 15 );
 			onCreate();
 			
-			health = ( FlxG.level == 0 ) ? MAX_HEALTH : FlxG.scores[ Faller.SCORES_HEALTH_INDEX ];			
+			health = ( FlxG.level == 0 ) ? MAX_HEALTH : FlxG.scores[ SCORES_HEALTH_INDEX ];			
 		}
 		
 		private function onCreate():void 
@@ -39,8 +43,8 @@ package
 			maxVelocity.x = 80;
 			maxVelocity.y = PlayState.GRAVITY;
 			acceleration.y = PlayState.GRAVITY;
-			//drag.x = maxVelocity.x * 4;
-			//drag.y = maxVelocity.y * 4;
+			drag.x = maxVelocity.x * 4;
+			drag.y = maxVelocity.y * 4;
 			
 			//createMeter();
 		}
@@ -95,7 +99,7 @@ package
 			//cap health
 			health = Math.max( 0, Math.min( health, MAX_HEALTH ));
 			//update global health var for the meter
-			FlxG.scores[ Faller.SCORES_HEALTH_INDEX ] = health;
+			FlxG.scores[ SCORES_HEALTH_INDEX ] = health;
 			
 			if ( health <= 0 )
 			{

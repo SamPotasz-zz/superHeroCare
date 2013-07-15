@@ -12,6 +12,8 @@ package states
 	 */
 	public class PlayState extends FlxState 
 	{
+		
+		
 		private static const SKY_ROWS:int = 5 * 2;
 		
 		private static const PLATFORM_ROWS:int = 1 * 2;
@@ -33,12 +35,12 @@ package states
 		public static const SAVED_TEXT_X:int = 3;
 		private static const SAVED_TEXT_Y:int = 18;
 		private static const SAVED_TEXT_INTRO:String = "NUM SAVED: ";
-		private var savedText:FlxText = new FlxText( SAVED_TEXT_X, SAVED_TEXT_Y, 100, SAVED_TEXT_INTRO + "0" );
+		private var savedText:FlxText = new FlxText( SAVED_TEXT_X, SAVED_TEXT_Y, Main.GAME_WIDTH, SAVED_TEXT_INTRO + "0" );
 		
 		private static const DEAD_TEXT_X:int = SAVED_TEXT_X;
 		private static const DEAD_TEXT_Y:int = SAVED_TEXT_Y + 10;
 		private static const DEAD_TEXT_INTRO:String = "NUM DEAD: ";
-		private var deadText:FlxText = new FlxText( DEAD_TEXT_X, DEAD_TEXT_Y, 100, DEAD_TEXT_INTRO + "0" );
+		private var deadText:FlxText = new FlxText( DEAD_TEXT_X, DEAD_TEXT_Y, Main.GAME_WIDTH, DEAD_TEXT_INTRO + "0" );
 		
 		public var level:FlxTilemap;
 		
@@ -52,6 +54,8 @@ package states
 		
 		//an array containing our level data
 		private var firstMap:Array = new Array();
+		
+		private var currStats:LevelStats;
 		
 		override public function create(): void
 		{
@@ -69,14 +73,19 @@ package states
 			add( fallerFactory );
 			
 			//initialize scores
+			FlxG.scores[ FlxG.level ] = new LevelStats();
+			currStats = FlxG.scores[ FlxG.level ];
+			/*
 			if ( FlxG.level == 0 )
 			{
 				FlxG.scores[ Faller.SCORES_SAVED_INDEX ] = 0;
 				FlxG.scores[ Faller.SCORES_DEAD_INDEX ] = 0;
 			}
+			*/
 			
 			add( savedText );
 			add( deadText );
+			updateDeadText();
 			
 			restArea.x = Main.GAME_WIDTH - ( Main.TILE_SIZE * ( PLATFORM_COLS - 1 ));
 			restArea.y = Main.TILE_SIZE * SKY_ROWS - restArea.height;
@@ -172,16 +181,40 @@ package states
 		/* status text functions */
 		public function updateDeadText(): void
 		{
-			deadText.text = DEAD_TEXT_INTRO + FlxG.scores[ Faller.SCORES_DEAD_INDEX ];
+			var breakDown:String = "(";
+			var sum:int = 0;
+			for ( var i:int = 0; i <= FlxG.level; i++ )
+			{
+				var deaths:int = ( LevelStats )( FlxG.scores[ i ] ).numDead;
+				sum += deaths;
+				
+				breakDown += i > 0 ? ", " : " ";	//add separators
+				breakDown += deaths;				//add number
+			}
+			breakDown += " )";
+			
+			deadText.text = DEAD_TEXT_INTRO + sum; // + " " + breakDown;
 		}
 		public function updateSavedText(): void
 		{
-			savedText.text = SAVED_TEXT_INTRO + FlxG.scores[ Faller.SCORES_SAVED_INDEX ];
+			var breakDown:String = "(";
+			var sum:int = 0;
+			for ( var i:int = 0; i <= FlxG.level; i++ )
+			{
+				var saves:int = ( LevelStats )( FlxG.scores[ i ] ).numSaved;
+				sum += saves;
+				
+				breakDown += i > 0 ? ", " : " ";	//add separators
+				breakDown += saves;				//add number
+			}
+			breakDown += " )";
+			
+			savedText.text = SAVED_TEXT_INTRO + sum; // + " " + breakDown;
 		}
 		
 		public function endGame():void 
 		{
-			FlxG.switchState( new TitleState() );
+			FlxG.switchState( new GameOverState() );
 		}
 		
 		public function nextLevel():void 
@@ -189,7 +222,7 @@ package states
 			FlxG.level++;
 			if ( FlxG.level >= NUM_LEVELS )
 			{
-				FlxG.switchState( new TitleState() );
+				FlxG.switchState( new WinState() );
 			}
 			else
 			{

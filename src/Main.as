@@ -4,6 +4,7 @@ package
 	import flash.events.Event;
 	import org.flixel.*;
 	import states.TitleState;
+	import states.WinState;
 	
 	/**
 	 * ...
