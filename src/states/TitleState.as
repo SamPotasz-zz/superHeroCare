@@ -12,6 +12,8 @@ package states
 	{
 		override public function create():void
 		{
+			add( new PlayBackground() );
+			
 			var title:FlxText;
 			title = new FlxText(0, 16, FlxG.width, "Self Care\nSuper Hero");
 			title.setFormat (null, 16, 0xFFFFFFFF, "center");

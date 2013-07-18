@@ -5,6 +5,7 @@ package
 	import org.flixel.FlxSprite;
 	import org.flixel.FlxState;
 	import org.flixel.FlxText;
+	import states.PlayState;
 	
 	/**
 	 * ...
@@ -12,12 +13,12 @@ package
 	 */
 	public class HealthMeter extends FlxObject 
 	{
-		private static const TEXT_X:int = 3;
-		private static const TEXT_Y:int = 3;
-		private static const TEXT_TEXT:String = "HEALTH: ";
-		private static const TEXT_WIDTH:int = 45;
+		private static const TEXT_X:int = PlayState.SAVED_TEXT_X;
+		private static const TEXT_Y:int = PlayState.SAVED_TEXT_Y - 12;
+		private static const TEXT_TEXT:String = "STRENGTH: ";
+		private static const TEXT_WIDTH:int = 58;
 		
-		private static const BOX_Y:int = TEXT_X + 2;
+		private static const BOX_Y:int = TEXT_Y + 2;
 		
 		private var meterFrame:FlxSprite = new FlxSprite( TEXT_X + TEXT_WIDTH, BOX_Y );
 		 

@@ -1,6 +1,8 @@
 package states
 {
 	import org.flixel.FlxG;
+	import org.flixel.FlxGroup;
+	import org.flixel.FlxObject;
 	import org.flixel.FlxSprite;
 	import org.flixel.FlxState;
 	import org.flixel.FlxText;
@@ -11,15 +13,13 @@ package states
 	 * @author Sam Potasznik
 	 */
 	public class PlayState extends FlxState 
-	{
-		
-		
+	{	
 		private static const SKY_ROWS:int = 5 * 2;
 		
-		private static const PLATFORM_ROWS:int = 1 * 2;
+		private static const PLATFORM_ROWS:int = 0;//1 * 2;
 		private static const PLATFORM_COLS:int = 3 * 2;
 		
-		private static const MIDDLE_ROWS:int = 7 * 2;
+		private static const MIDDLE_ROWS:int = 8 * 2;
 		
 		private static const FLOOR_ROWS:int = 5 * 2;
 		public static const FLOOR_COLS:int = 3 * 2;
@@ -32,8 +32,8 @@ package states
 		
 		static public const NUM_LEVELS:int = 3;
 		
-		public static const SAVED_TEXT_X:int = 3;
-		private static const SAVED_TEXT_Y:int = 18;
+		public static const SAVED_TEXT_X:int = Main.TILE_SIZE * FLOOR_COLS + 2;
+		public static const SAVED_TEXT_Y:int = Main.GAME_HEIGHT - 54;
 		private static const SAVED_TEXT_INTRO:String = "SAVED: ";
 		private var savedText:FlxText = new FlxText( SAVED_TEXT_X, SAVED_TEXT_Y, Main.GAME_WIDTH, 
 			SAVED_TEXT_INTRO + "0" );
@@ -58,9 +58,13 @@ package states
 		
 		private var currStats:LevelStats;
 		
+		private var _landingPads:FlxGroup = new FlxGroup();
+		
 		override public function create(): void
 		{
 			FlxG.bgColor = 0xffaaaaaa;
+			
+			addBackground();
 			
 			createFirstMap();
 			
@@ -69,8 +73,6 @@ package states
 			//trace( "CSV: \n" + csv );
 			level.loadMap(csv, FlxTilemap.ImgAuto, 0, 0, FlxTilemap.AUTO);
 			add(level);
-			
-			
 			
 			//initialize scores
 			FlxG.scores[ FlxG.level ] = new LevelStats();
@@ -88,21 +90,61 @@ package states
 			
 			savedText.text = SAVED_TEXT_INTRO + "0 / " + currStats.numFallers;
 			add( savedText );
-			//add( deadText );
-			//updateDeadText();
 			
-			restArea.x = Main.GAME_WIDTH - ( Main.TILE_SIZE * ( PLATFORM_COLS - 1 ));
-			restArea.y = Main.TILE_SIZE * SKY_ROWS - restArea.height;
-			add( restArea );
+			//addRestArea();
 			
 			healthMeter = new HealthMeter( this );
 			if( FlxG.level == 0 )
 				FlxG.scores[ Player.SCORES_HEALTH_INDEX ] = 1000;
 			add( healthMeter );
 			
+			addArrow();
+			
+			addLandingPads();
+			
 			//add player last for depth
 			player = new Player();
 			addPlayer();
+		}
+		
+		private function addLandingPads():void 
+		{
+			var leftPad:LandingPad = new LandingPad();
+			leftPad.x = 0;
+			leftPad.y = Main.GAME_HEIGHT - ( Main.TILE_SIZE * FLOOR_ROWS ) - leftPad.height;
+			add( leftPad );
+			
+			var rightPad:LandingPad = new LandingPad();
+			rightPad.x = Main.GAME_WIDTH - ( Main.TILE_SIZE * FLOOR_COLS );
+			rightPad.y = Main.GAME_HEIGHT - ( Main.TILE_SIZE * FLOOR_ROWS ) - leftPad.height;
+			add( rightPad );
+			
+			_landingPads.add( leftPad );
+			_landingPads.add( rightPad );
+		}
+		
+		private function addRestArea():void 
+		{
+			restArea.x = Main.GAME_WIDTH - ( Main.TILE_SIZE * ( PLATFORM_COLS - 1 ));
+			restArea.y = Main.TILE_SIZE * SKY_ROWS - restArea.height;
+			add( restArea );
+		}
+		
+		private function addBackground():void 
+		{
+			add( new PlayBackground() );
+		}
+		
+		private function addArrow():void 
+		{
+			var arrow:NextArrow = new NextArrow();
+			
+			var arrowX:int = Main.GAME_WIDTH - arrow.width - Main.TILE_SIZE;
+			var arrowY:int = Main.GAME_HEIGHT - ( Main.TILE_SIZE * FLOOR_ROWS ) - arrow.height;
+			
+			arrow.x = arrowX;
+			arrow.y = arrowY;
+			add( arrow );
 		}
 		
 		private function addPlayer():void 
@@ -168,16 +210,62 @@ package states
 		{
 			super.update();
 			
-			FlxG.collide( level, player );
+			FlxG.collide( player, level, onGround );
+			//FlxG.collide( level, player );
+			FlxG.collide( fallerFactory.fallers, level );
 			
 			FlxG.overlap( fallerFactory.fallers, player, onCatch );
 			
-			FlxG.overlap( restArea, player, onRest );
+			FlxG.overlap( fallerFactory.fallers, landingPads, onLanded );
+			
+			FlxG.overlap( fallerFactory.healths, player, onHealth );
+			//for each (var faller:Faller in fallerFactory.fallers ) 
+			//{
+				//FlxG.overlap( faller, leftPad, onLanded );
+			//}
+			
+			//FlxG.overlap( restArea, player, onRest );
+			
+			
+		}
+		
+		private function onHealth( packet:HealthPacket, player:Player ):void 
+		{
+			player.onHealth( packet.strength );
+			packet.onCaught();
+		}
+		
+		private function onLanded( faller:Faller, pad:LandingPad ):void 
+		{
+			if ( !faller.landed )
+			{
+				trace( "Faller " + faller.index + " landed." );
+				//trace("Overlap!" );
+				faller.onLanded();
+				player.onLanded( faller );
+				//faller.kill();
+			}
+		}
+		
+		private function onGround( player:Player, level:FlxTilemap ):void 
+		{
+			FlxObject.separate( player, level );
+			player.angle = -90;
 		}
 		
 		private function onCatch( faller:Faller, player:Player ):void 
 		{
-			faller.onCaught();
+			if ( faller.isFalling )
+			{
+				trace("Caught faller " + faller.index );
+				player.onCaught( faller );
+				faller.onCaught();
+			}	
+			else
+			{
+				
+			//trace( "NOT falling" )
+			}
 		}
 		
 		private function onRest( restArea:RestArea, player:Player ): void
@@ -229,6 +317,11 @@ package states
 		public function nextLevel():void 
 		{
 			FlxG.switchState( new LevelOutro() );
+		}
+		
+		public function get landingPads():FlxGroup 
+		{
+			return _landingPads;
 		}
 	}
 

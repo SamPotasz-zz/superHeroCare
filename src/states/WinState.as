@@ -12,6 +12,8 @@ package states
 	{
 		override public function create():void
 		{
+			add( new PlayBackground() );
+			
 			/*
 			var title:FlxText;
 			title = new FlxText(0, 20, FlxG.width, "WOO HOO!\n\nYou made it through!");

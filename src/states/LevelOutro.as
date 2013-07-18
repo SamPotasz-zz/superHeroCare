@@ -24,7 +24,11 @@ package states
 		
 		override public function create(): void
 		{
+			FlxG.bgColor = 0xff000000;
+			
 			currStats = FlxG.scores[ FlxG.level ];
+		
+			add( new PlayBackground() );
 			
 			var saved:FlxText;
 			saved = new FlxText( TEXT_X, 24, Main.GAME_WIDTH - 2*TEXT_X, 
