@@ -21,10 +21,14 @@ package
 		public static const GAME_WIDTH:int = TILE_SIZE * NUM_COLS; 	//208
 		public static const GAME_HEIGHT:int = TILE_SIZE * NUM_ROWS; //288
 		
+		public static const HIGH_SCORE:String = "high score";
+		
 		[SWF( width = "416", height = "576" )]
 		public function Main():void 
 		{
-			super( GAME_WIDTH, GAME_HEIGHT, PlayState, 2 );
+			super( GAME_WIDTH, GAME_HEIGHT, TitleState, 2 );
+			
+			HighScore.load();
 		}
 	}
 	

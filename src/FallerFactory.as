@@ -16,9 +16,14 @@ package
 		
 		private static const HEALTH_PERIODS:Array = [ 4.0, 5.0, 3.0 ];
 		
-		private static const FALLS_PER_LEVEL:int = 5;
+		private static const SAVES_PER_LEVEL:int = 5;
 		//multiplier so as to constantly decrease the period
-		private static const PERIOD_INCREASE_PER_LEVEL:Number = .60;
+		private static const PERIOD_INCREASE_PER_LEVEL:Number = .90;
+		private static const MIN_FALL_PERIOD:Number = 0.3;
+		
+		private static const LEVEL_TEXT_X:int = HealthMeter.TEXT_X;
+		private static const LEVEL_TEXT_Y:int = HealthMeter.TEXT_Y + 24;
+		private static const LEVEL_TEXT_STRING:String = "LEVEL: ";
 		
 		//how many seconds between creations
 		private var fallPeriod:Number;
@@ -36,9 +41,16 @@ package
 		
 		private var playState:PlayState;
 		
+		private var levelText:FlxText = new FlxText( LEVEL_TEXT_X, LEVEL_TEXT_Y, 100 );
+		
 		//now many fallers will we create for the level
 		private var _numFalls:int;
 		
+		/*
+		 * every x num of falls, we go up a level. 
+		 * things get faster, possibly heavier, etc.
+		 * 0 indexed
+		 */
 		private var level:int = 0;
 		
 		public function FallerFactory( playState:PlayState ) 
@@ -51,6 +63,18 @@ package
 			//_numFalls = ( LevelStats )( FlxG.scores[ FlxG.level ]).numFallers;
 			fallTimer.start( fallPeriod, 0, onTimer );
 			healthTimer.start( healthPeriod, 0, onHealthTimer );
+			
+			playState.add( levelText );
+			updateLevelText();
+		}
+		
+		public function onLanded():void 
+		{
+			var numSaves:int = ( LevelStats )( FlxG.scores[ FlxG.level ]).numSaved;
+			if ( numSaves % SAVES_PER_LEVEL == 0 )
+			{
+				increaseLevel();
+			}
 		}
 		
 		private function onTimer( timer:FlxTimer ): void
@@ -61,17 +85,22 @@ package
 			
 			playState.add( faller );
 			
-			_numFalls++;
-			if ( _numFalls % FALLS_PER_LEVEL == 0 )
-			{
-				increaseLevel();
-			}
+			//_numFalls++;
+			//if ( _numFalls % SAVES_PER_LEVEL == 0 )
+			//{
+				//increaseLevel();
+			//}
 		}
 		
 		private function increaseLevel():void 
 		{
 			fallPeriod *= PERIOD_INCREASE_PER_LEVEL;
+			fallPeriod = Math.max( MIN_FALL_PERIOD, fallPeriod );
+			fallTimer.stop();
+			fallTimer.start( fallPeriod, 0, onTimer );
 			level++;
+			
+			updateLevelText();
 		}
 		
 		private function onHealthTimer( timer:FlxTimer ): void
@@ -100,6 +129,11 @@ package
 		public function get healths():FlxGroup 
 		{
 			return _healths;
+		}
+		
+		private function updateLevelText(): void
+		{
+			levelText.text = LEVEL_TEXT_STRING + ( level + 1 );
 		}
 		
 		/* 

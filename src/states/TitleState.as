@@ -12,15 +12,22 @@ package states
 	{
 		override public function create():void
 		{
+			FlxG.bgColor = 0xff000000;
 			add( new PlayBackground() );
 			
+			var birdPlane:FlxText = new FlxText( 20, 16, FlxG.width - 40, 
+				"It's a bird!\nIt's a plane!\nNo! It's" );
+			birdPlane.setFormat (null, 10, 0xFFFFFFFF );
+			add( birdPlane );
+			
 			var title:FlxText;
-			title = new FlxText(0, 16, FlxG.width, "Self Care\nSuper Hero");
-			title.setFormat (null, 16, 0xFFFFFFFF, "center");
+			title = new FlxText( 8, 64, FlxG.width - 16, "Super Selfless Hero!");
+			title.setFormat (null, 15, 0xFFFFFFFF, "center");
 			add(title);
 			
 			var instructions:FlxText;
-			instructions = new FlxText(20, 128, FlxG.width, "Use the ARROW KEYS to move.\n\nPress SPACE to start!");
+			instructions = new FlxText(20, 128, FlxG.width - 40, "Use the ARROW KEYS to " + 
+				"carry the mice to safety!\n\nPress SPACE to start!");
 			instructions.setFormat (null, 12, 0xFFFFFFFF );
 			add(instructions);
 			

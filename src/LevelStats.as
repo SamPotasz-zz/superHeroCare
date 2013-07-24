@@ -14,6 +14,8 @@ package
 		
 		private var _numFallers:int = 0;
 		
+		private var _points:int = 0;
+		
 		public function LevelStats(){}
 		
 		public function addSaved(): void
@@ -24,6 +26,10 @@ package
 		{
 			_numDead++;
 		}
+		public function addPoints( value:int ): void
+		{
+			_points += value;
+		}
 		
 		public function get numSaved():int 
 		{
@@ -32,6 +38,10 @@ package
 		public function get numDead():int 
 		{
 			return _numDead;
+		}
+		public function get points():int
+		{
+			return _points;
 		}
 		
 		public function get numFallers():int 

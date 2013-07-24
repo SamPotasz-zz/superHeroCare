@@ -68,7 +68,7 @@ package
 			velocity.y = 100;
 			acceleration.y = 0; // PlayState.GRAVITY;
 			
-			_weight = WEIGHT_MIN + WEIGHT_INCREASE_BY_LEVEL * level;
+			_weight = WEIGHT_MIN;// + WEIGHT_INCREASE_BY_LEVEL * level;
 			
 			currStats = FlxG.scores[ FlxG.level ];
 		}
@@ -103,7 +103,7 @@ package
 			{
 				if ( y > Main.GAME_HEIGHT )
 				{
-					FlxG.play( CaughtSFX );
+					//FlxG.play( OffscreenSFX );
 					currStats.addDead();
 					( PlayState )( FlxG.state ).updateDeadText();					
 				}

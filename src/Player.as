@@ -3,6 +3,7 @@ package
 	import org.flixel.FlxG;
 	import org.flixel.FlxObject;
 	import org.flixel.FlxSprite;
+	import org.flixel.FlxTimer;
 	import states.PlayState;
 	
 	/**
@@ -15,6 +16,8 @@ package
 		[Embed(source = "../assets/player.png")] 
 		private var PlayerImage:Class;
 
+		[Embed( source = "../assets/sound/gameOver.mp3" )]
+		private var DeathSFX:Class;
 		
 		public static const SCORES_HEALTH_INDEX:int = 3;
 		
@@ -23,12 +26,12 @@ package
 		private static const TEXT_TEXT:String = "HEALTH: ";
 		private static const TEXT_WIDTH:int = 20;
 		
-		private static const MAX_HEALTH:int = 48;
+		public static const MAX_HEALTH:int = 48;
 		private static const HEALTH_DECREASE:Number = 5.0;//0.05;	//how fast health decresases
 		private static const HEALTH_INCREASE:Number = 0.1;
 		
 		private static const MAX_VELOCITY:int = 80;
-		private static const MIN_VELOCITY:int = 35;
+		private static const MIN_VELOCITY:int = 20;
 		
 		private var meterFrame:FlxSprite = new FlxSprite( TEXT_X + TEXT_WIDTH, TEXT_Y );
 		 
@@ -38,6 +41,8 @@ package
 		
 		private var carrying:Vector.<Faller> = new Vector.<Faller>();
 		
+		//private var alive:Boolean = true;
+		
 		public function Player() 
 		{
 			super( FlxG.width - 24 );
@@ -46,6 +51,8 @@ package
 			//health = Math.min( MAX_HEALTH, FlxG.scores[ SCORES_HEALTH_INDEX ] + ( MAX_HEALTH / 4.0 ));
 			health = MAX_HEALTH;
 			FlxG.scores[ SCORES_HEALTH_INDEX ] = health;
+			
+			//alive = true;
 		}
 		
 		private function onCreate():void 
@@ -63,52 +70,51 @@ package
 		{
 			acceleration.x = 0;
 			
-			var healthPercent:Number = health / MAX_HEALTH;
-			maxVelocity.x = ( MAX_VELOCITY - MIN_VELOCITY ) * healthPercent + MIN_VELOCITY;
-			
-			if ( FlxG.keys.LEFT )
+			if ( alive )
 			{
-				acceleration.x = -maxVelocity.x * 6;
-			}
-			if( FlxG.keys.RIGHT )
-			{
-				acceleration.x = maxVelocity.x * 6;
-			}
-			if( FlxG.keys.UP )
-			{
-				velocity.y = -maxVelocity.y/3;
-			}
-			if ( FlxG.keys.DOWN )
-			{
-				velocity.y = maxVelocity.y * 2;
-			}
-			
-			//bound movement
-			y = Math.max( y, 0 );
-			x = Math.max( x, 0 );
-			if ( y < PlayState.LEVEL_ADVANCE_Y )
-			{
+				var healthPercent:Number = health / MAX_HEALTH;
+				maxVelocity.x = ( MAX_VELOCITY - MIN_VELOCITY ) * healthPercent + MIN_VELOCITY;
+				
+				if ( FlxG.keys.LEFT )
+				{
+					acceleration.x = -maxVelocity.x * 6;
+				}
+				if( FlxG.keys.RIGHT )
+				{
+					acceleration.x = maxVelocity.x * 6;
+				}
+				if( FlxG.keys.UP )
+				{
+					velocity.y = -maxVelocity.y/3;
+				}
+				if ( FlxG.keys.DOWN )
+				{
+					velocity.y = maxVelocity.y * 2;
+				}
+				
+				//bound movement
+				y = Math.max( y, 0 );
+				x = Math.max( x, 0 );
 				x = Math.min( x, Main.GAME_WIDTH - width );
-			}
-			
-			if ( !onScreen() )
-			{
-				if ( x > Main.GAME_WIDTH )
+				
+				
+				if ( !onScreen() )
 				{
-					( PlayState )( FlxG.state ).nextLevel();
-				}
-				else if ( x < 0 )
-				{
-					x = 0;
-				}
-				else
-				{
-					gameOver();
-				}
-			}
-			
-			//update health
-			//updateHealth();
+					if ( x > Main.GAME_WIDTH - width )
+					{
+						x = Main.GAME_WIDTH - width;
+						//( PlayState )( FlxG.state ).nextLevel();
+					}
+					else if ( x < 0 )
+					{
+						x = 0;
+					}
+					else
+					{
+						onDead();
+					}
+				}	//end if onscreen
+			}		//end if alive
 			
 			setRotation();
 			
@@ -127,8 +133,11 @@ package
 				
 				FlxObject.separate( currLoad, ( PlayState )( FlxG.state ).level );
 				
-				//currLoad.velocity.x = velocity.x;
-				//currLoad.velocity.y = velocity.y;
+				if ( !currLoad.onScreen() )
+				{
+					removeFromCarrying( currLoad );
+					i--;
+				}
 			}
 		}
 		
@@ -142,7 +151,7 @@ package
 			
 			if ( health <= 0 )
 			{
-				gameOver();
+				onDead();
 			}
 		}
 		
@@ -152,7 +161,16 @@ package
 			angle = radians * 180 / Math.PI;
 		}
 		
-		private function gameOver(): void
+		private function onDead(): void
+		{
+			FlxG.play( DeathSFX );
+			alive = false;
+			
+			var deathTimer:FlxTimer = new FlxTimer();
+			deathTimer.start( 2.0, 1, onDeathTimer );
+		}
+		
+		private function onDeathTimer( timer:FlxTimer ):void 
 		{
 			( PlayState )( FlxG.state ).endGame();
 		}
@@ -174,10 +192,8 @@ package
 			
 			if ( health <= 0 )
 			{
-				gameOver();
+				onDead();
 			}
-			
-			trace( "Now carrying " + carryingString );
 		}
 		
 		private function get carryingString():String 
@@ -192,11 +208,16 @@ package
 		
 		public function onLanded( faller:Faller ):void 
 		{
-			trace("Before: " + carryingString )
+			removeFromCarrying( faller );
+		}
+		
+		private function removeFromCarrying(faller:Faller):void 
+		{
+			//trace("Before: " + carryingString )
 			var index:int = carrying.indexOf( faller );
-			trace( "Removing " + faller.index + " at index " + index );
+			//trace( "Removing " + faller.index + " at index " + index );
 			carrying.splice( index, 1 );
-			trace( "After: " + carryingString );
+			//trace( "After: " + carryingString );
 		}
 		
 		public function onHealth( strength:int ):void 

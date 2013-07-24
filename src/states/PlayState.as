@@ -7,6 +7,7 @@ package states
 	import org.flixel.FlxState;
 	import org.flixel.FlxText;
 	import org.flixel.FlxTilemap;
+	import org.flixel.FlxTimer;
 	
 	/**
 	 * ...
@@ -14,6 +15,12 @@ package states
 	 */
 	public class PlayState extends FlxState 
 	{	
+		[Embed(source = "../../assets/leftHousesBig.png")] 
+		private var LeftImage:Class;
+		
+		[Embed(source = "../../assets/rightHousesBig.png")] 
+		private var RightImage:Class;
+		
 		private static const SKY_ROWS:int = 5 * 2;
 		
 		private static const PLATFORM_ROWS:int = 0;//1 * 2;
@@ -60,6 +67,8 @@ package states
 		
 		private var _landingPads:FlxGroup = new FlxGroup();
 		
+		private var comboTimer:FlxTimer = new FlxTimer();
+		
 		override public function create(): void
 		{
 			FlxG.bgColor = 0xffaaaaaa;
@@ -88,7 +97,7 @@ package states
 			fallerFactory = new FallerFactory( this );
 			add( fallerFactory );
 			
-			savedText.text = SAVED_TEXT_INTRO + "0 / " + currStats.numFallers;
+			savedText.text = SAVED_TEXT_INTRO + "0";// + currStats.numFallers;
 			add( savedText );
 			
 			//addRestArea();
@@ -98,7 +107,7 @@ package states
 				FlxG.scores[ Player.SCORES_HEALTH_INDEX ] = 1000;
 			add( healthMeter );
 			
-			addArrow();
+			//addArrow();
 			
 			addLandingPads();
 			
@@ -109,14 +118,25 @@ package states
 		
 		private function addLandingPads():void 
 		{
-			var leftPad:LandingPad = new LandingPad();
+			var houseY:int = Main.GAME_HEIGHT - ( Main.TILE_SIZE * FLOOR_ROWS ) - 12;
+			var leftHouses:FlxSprite = new FlxSprite( 0, houseY );
+			leftHouses.loadGraphic( LeftImage );
+			add( leftHouses );
+			
+			var leftPad:LandingPad = new LandingPad( true );
 			leftPad.x = 0;
-			leftPad.y = Main.GAME_HEIGHT - ( Main.TILE_SIZE * FLOOR_ROWS ) - leftPad.height;
+			var padY:int = Main.GAME_HEIGHT - ( Main.TILE_SIZE * FLOOR_ROWS ) - leftPad.height + 2;
+			leftPad.y = padY;
 			add( leftPad );
 			
-			var rightPad:LandingPad = new LandingPad();
-			rightPad.x = Main.GAME_WIDTH - ( Main.TILE_SIZE * FLOOR_COLS );
-			rightPad.y = Main.GAME_HEIGHT - ( Main.TILE_SIZE * FLOOR_ROWS ) - leftPad.height;
+			var rightEdge:int = Main.GAME_WIDTH - ( Main.TILE_SIZE * FLOOR_COLS );
+			var rightHouses:FlxSprite = new FlxSprite( Main.GAME_WIDTH - 26, houseY );
+			rightHouses.loadGraphic( RightImage );
+			add( rightHouses );
+			
+			var rightPad:LandingPad = new LandingPad( false );
+			rightPad.x = rightEdge;
+			rightPad.y = padY;
 			add( rightPad );
 			
 			_landingPads.add( leftPad );
@@ -212,7 +232,7 @@ package states
 			
 			FlxG.collide( player, level, onGround );
 			//FlxG.collide( level, player );
-			FlxG.collide( fallerFactory.fallers, level );
+			FlxG.overlap( fallerFactory.fallers, level, onFallerCollideLevel );
 			
 			FlxG.overlap( fallerFactory.fallers, player, onCatch );
 			
@@ -229,6 +249,14 @@ package states
 			
 		}
 		
+		private function onFallerCollideLevel( faller:Faller, level:FlxTilemap ):void 
+		{
+			if ( !faller.landed )
+			{
+				FlxObject.separate( faller, level );
+			}
+		}
+		
 		private function onHealth( packet:HealthPacket, player:Player ):void 
 		{
 			player.onHealth( packet.strength );
@@ -243,6 +271,7 @@ package states
 				//trace("Overlap!" );
 				faller.onLanded();
 				player.onLanded( faller );
+				fallerFactory.onLanded();
 				//faller.kill();
 			}
 		}
@@ -306,7 +335,7 @@ package states
 			breakDown += " )";
 			
 			//savedText.text = SAVED_TEXT_INTRO + sum + " " + breakDown;
-			savedText.text = SAVED_TEXT_INTRO + currStats.numSaved + " / " + currStats.numFallers;
+			savedText.text = SAVED_TEXT_INTRO + currStats.numSaved; // + " / " + currStats.numFallers;
 		}
 		
 		public function endGame():void 
