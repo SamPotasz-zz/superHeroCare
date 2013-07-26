@@ -8,6 +8,7 @@ package states
 	import org.flixel.FlxText;
 	import org.flixel.FlxTilemap;
 	import org.flixel.FlxTimer;
+	import org.flixel.system.input.Mouse;
 	
 	/**
 	 * ...
@@ -20,6 +21,9 @@ package states
 		
 		[Embed(source = "../../assets/rightHousesBig.png")] 
 		private var RightImage:Class;
+		
+		[Embed(source = "../../assets/sound/TheSpectatorByKubiAudacity.mp3")] 
+		private var GameMusic:Class;
 		
 		private static const SKY_ROWS:int = 5 * 2;
 		
@@ -41,7 +45,7 @@ package states
 		
 		public static const SAVED_TEXT_X:int = Main.TILE_SIZE * FLOOR_COLS + 2;
 		public static const SAVED_TEXT_Y:int = Main.GAME_HEIGHT - 54;
-		private static const SAVED_TEXT_INTRO:String = "SAVED: ";
+		private static const SAVED_TEXT_INTRO:String = "SCORE: ";
 		private var savedText:FlxText = new FlxText( SAVED_TEXT_X, SAVED_TEXT_Y, Main.GAME_WIDTH, 
 			SAVED_TEXT_INTRO + "0" );
 		
@@ -68,6 +72,9 @@ package states
 		private var _landingPads:FlxGroup = new FlxGroup();
 		
 		private var comboTimer:FlxTimer = new FlxTimer();
+		private var comboLength:int = 0;
+		
+		private var song:FlxExtendedSound = new FlxExtendedSound();
 		
 		override public function create(): void
 		{
@@ -111,9 +118,15 @@ package states
 			
 			addLandingPads();
 			
+			add( new MuteButton() );
+			
 			//add player last for depth
 			player = new Player();
 			addPlayer();
+			
+			FlxG.playMusic( GameMusic );
+			//song.loadEmbedded( GameMusic );
+			//song.play();
 		}
 		
 		private function addLandingPads():void 
@@ -251,7 +264,7 @@ package states
 		
 		private function onFallerCollideLevel( faller:Faller, level:FlxTilemap ):void 
 		{
-			if ( !faller.landed )
+			if ( !faller.alreadyLanded )
 			{
 				FlxObject.separate( faller, level );
 			}
@@ -265,15 +278,28 @@ package states
 		
 		private function onLanded( faller:Faller, pad:LandingPad ):void 
 		{
-			if ( !faller.landed )
+			if ( !faller.alreadyLanded )
 			{
-				trace( "Faller " + faller.index + " landed." );
-				//trace("Overlap!" );
+				//add score
+				if ( comboLength == 0 )
+				{
+					comboTimer.start( 0.25, 1, onComboTimer );
+				}
+				currStats.addPoints( 100 + 50 * comboLength );
+				comboLength++;
+				
 				faller.onLanded();
 				player.onLanded( faller );
 				fallerFactory.onLanded();
-				//faller.kill();
+				
+				
 			}
+		}
+		
+		private function onComboTimer( timer:FlxTimer ): void
+		{
+			comboTimer.stop();
+			comboLength = 0;
 		}
 		
 		private function onGround( player:Player, level:FlxTilemap ):void 
@@ -335,13 +361,20 @@ package states
 			breakDown += " )";
 			
 			//savedText.text = SAVED_TEXT_INTRO + sum + " " + breakDown;
-			savedText.text = SAVED_TEXT_INTRO + currStats.numSaved; // + " / " + currStats.numFallers;
+			savedText.text = SAVED_TEXT_INTRO + currStats.points //numSaved;
 		}
 		
 		public function endGame():void 
 		{
 			FlxG.switchState( new GameOverState() );
 		}
+		
+		/*
+		public function get music(): FlxExtendedSound
+		{
+			return song;
+		}
+		*/
 		
 		public function nextLevel():void 
 		{

@@ -3,6 +3,7 @@ package states
 	import org.flixel.FlxG;
 	import org.flixel.FlxState;
 	import org.flixel.FlxText;
+	import org.photonstorm.api.FlxKongregate;
 	
 	/**
 	 * ...
@@ -10,7 +11,7 @@ package states
 	 */
 	public class GameOverState extends FlxState 
 	{
-		private var currScore:int;
+		private var currStats:LevelStats;
 		
 		override public function create():void
 		{
@@ -18,7 +19,7 @@ package states
 			
 			add( new PlayBackground() );
 			
-			currScore = ( LevelStats )( FlxG.scores[ FlxG.level ]).numSaved;
+			currStats = FlxG.scores[ FlxG.level ];
 			
 			var titleString:String = "Oh no!\n\n" + 
 				"You've died a martyr.";
@@ -29,10 +30,10 @@ package states
 			add( title );
 			
 			var statString:String = "However, you did manage\nto save " +
-				currScore + " mice before your demise.";
+				currStats.numSaved + " mice for " + currStats.points + " points before your demise.";
 			
 			var stats:FlxText;
-			stats = new FlxText( 20, 120, FlxG.width, statString );
+			stats = new FlxText( 20, 120, FlxG.width - 40, statString );
 			stats.setFormat (null, 8, 0xFFFFFFFF );
 			add( stats );
 			
@@ -47,25 +48,28 @@ package states
 		private function addHighScore():void 
 		{
 			var highScore:int = HighScore.highScore;
+			var currPoints:int = currStats.points;
+			
+			FlxKongregate.submitStats( "highScore", currPoints );
 			
 			var displayString:String = "";
-			if ( currScore > highScore )
+			if ( currPoints > highScore )
 			{
-				displayString = "And that's a new all-time best.";
-				HighScore.highScore = currScore;
+				displayString = "And that's a new best for this session.";
+				HighScore.highScore = currPoints;
 			}
-			else if ( currScore == highScore )
+			else if ( currPoints == highScore )
 			{
-				displayString = "This ties your all-time best.";
+				displayString = "This ties your best for this session.";
 			}
 			else
 			{
-				displayString = "But that's not as good as your \nall-time best " + 
-					"of " + highScore + " mice.";
+				displayString = "But that's not as good as your \nbest for this session " + 
+					"of " + highScore + " points.\nTry saving multiple mice at once for combos.";
 			}
 			
 			var highText:FlxText;
-			highText = new FlxText(20, 180, FlxG.width - 20, displayString );
+			highText = new FlxText(20, 180, FlxG.width - 40, displayString );
 			highText.setFormat (null, 8, 0xFFFFFFFF );
 			add(highText);
 		}

@@ -1,6 +1,7 @@
 package  
 {
 	import org.flixel.FlxG;
+	import org.photonstorm.api.FlxKongregate;
 	/**
 	 * ...
 	 * @author Sam Potasznik
@@ -21,6 +22,7 @@ package
 		public function addSaved(): void
 		{
 			_numSaved++;
+			FlxKongregate.submitStats( "numSaved", 1 );
 		}
 		public function addDead(): void
 		{

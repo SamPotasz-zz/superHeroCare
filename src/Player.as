@@ -4,6 +4,7 @@ package
 	import org.flixel.FlxObject;
 	import org.flixel.FlxSprite;
 	import org.flixel.FlxTimer;
+	import org.photonstorm.api.FlxKongregate;
 	import states.PlayState;
 	
 	/**
@@ -75,19 +76,19 @@ package
 				var healthPercent:Number = health / MAX_HEALTH;
 				maxVelocity.x = ( MAX_VELOCITY - MIN_VELOCITY ) * healthPercent + MIN_VELOCITY;
 				
-				if ( FlxG.keys.LEFT )
+				if ( FlxG.keys.LEFT || FlxG.keys.A )
 				{
 					acceleration.x = -maxVelocity.x * 6;
 				}
-				if( FlxG.keys.RIGHT )
+				if( FlxG.keys.RIGHT || FlxG.keys.D )
 				{
 					acceleration.x = maxVelocity.x * 6;
 				}
-				if( FlxG.keys.UP )
+				if( FlxG.keys.UP || FlxG.keys.W )
 				{
 					velocity.y = -maxVelocity.y/3;
 				}
-				if ( FlxG.keys.DOWN )
+				if ( FlxG.keys.DOWN || FlxG.keys.S )
 				{
 					velocity.y = maxVelocity.y * 2;
 				}
@@ -141,6 +142,7 @@ package
 			}
 		}
 		
+		/*
 		private function updateHealth():void 
 		{
 			health -= HEALTH_DECREASE;
@@ -154,6 +156,7 @@ package
 				onDead();
 			}
 		}
+		*/
 		
 		private function setRotation():void 
 		{
@@ -163,11 +166,15 @@ package
 		
 		private function onDead(): void
 		{
+			FlxG.music.stop();
+			//( PlayState )( FlxG.state ).music.stop();
 			FlxG.play( DeathSFX );
 			alive = false;
 			
 			var deathTimer:FlxTimer = new FlxTimer();
 			deathTimer.start( 2.0, 1, onDeathTimer );
+			
+			FlxKongregate.submitStats( "numDeaths", 1 );
 		}
 		
 		private function onDeathTimer( timer:FlxTimer ):void 
@@ -194,6 +201,19 @@ package
 			{
 				onDead();
 			}
+			
+			//updateSongSpeed();
+		}
+		
+		private function updateSongSpeed():void 
+		{
+			var toUpdate:FlxExtendedSound = song;
+			toUpdate.playbackSpeed = health / MAX_HEALTH;
+		}
+		
+		private function get song(): FlxExtendedSound
+		{
+			return ( PlayState )( FlxG.state ).music;
 		}
 		
 		private function get carryingString():String 

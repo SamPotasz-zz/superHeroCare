@@ -145,7 +145,7 @@ package
 			return _falling;
 		}
 		
-		public function get landed():Boolean 
+		public function get alreadyLanded():Boolean 
 		{
 			return _landed;
 		}
