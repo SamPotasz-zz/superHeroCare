@@ -23,7 +23,7 @@ package
 		
 		public static const HIGH_SCORE:String = "high score";
 		
-		[SWF( width = "416", height = "576" )]
+		[SWF( width = "416", height = "576", bgColor = "0x990000" )]
 		[Frame(factoryClass = "Preloader")] //Tells Flixel to use the default preloader 
 		
 		public function Main():void 

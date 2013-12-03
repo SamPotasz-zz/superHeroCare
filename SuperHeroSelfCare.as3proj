@@ -6,8 +6,8 @@
     <movie input="" />
     <movie path="bin\SuperHeroSelfCare.swf" />
     <movie fps="30" />
-    <movie width="400" />
-    <movie height="550" />
+    <movie width="416" />
+    <movie height="576" />
     <movie version="10" />
     <movie minorVersion="1" />
     <movie platform="Flash Player" />
